@@ -1,30 +1,40 @@
+import { Schema, Plugin,PluginsFn } from '@progress/kendo-angular-editor';
 import { Component } from '@angular/core';
 
+import { BookmarkManager } from './bookmark.service';
+import { SchemaService } from './schema.service';
+import { BookmarksEditorAdapter } from './bookmarks.editor.adapter';
+
+
 @Component({
-    selector: 'my-app',
-    template: ` <kendo-editor [value]="value" style="height: 570px;"></kendo-editor> `
+  selector: 'my-app',
+  template: `
+        <kendo-editor
+            [value]="value"
+            [plugins]="plugins"
+            [schema]="mySchema"
+            style="height: 370px;"></kendo-editor>
+    <button (click)=updateMeasurement()>update mesurement</button>`,
 })
 export class AppComponent {
-    public value = `
-        <p>
-            The Kendo UI Angular Editor allows your users to edit HTML in a familiar, user-friendly way.<br />
-            In this version, the Editor provides the core HTML editing engine which includes basic text formatting, hyperlinks, and lists.
-            The widget <strong>outputs identical HTML</strong> across all major browsers, follows
-            accessibility standards, and provides API for content manipulation.
-        </p>
-        <div style="display: inline-block; width: 39%;">
-            <p>Features include:</p>
-            <ul>
-                <li>Text formatting</li>
-                <li>Bulleted and numbered lists</li>
-                <li>Hyperlinks</li>
-                <li>Cross-browser support</li>
-                <li>Identical HTML output across browsers</li>
-                <li>Inserting and resizing images</li>
-            </ul>
-        </div>
-        <div style="display: inline-block; width: 60%; vertical-align: top;">
-            <img src="https://demos.telerik.com/kendo-ui/content/web/editor/tenerife.png" width="100%" style="min-width: 10px; min-height: 10px;" alt="Tenerife" />
-        </div>
+  constructor(
+    private bookmarksEditorAdapter: BookmarksEditorAdapter,
+    private bookMarkManager: BookmarkManager,
+    private schemaService: SchemaService,
+
+  ) {}
+
+  public plugins: PluginsFn = (defaultPlugins: Plugin[]) => {
+    return [...defaultPlugins, this.bookmarksEditorAdapter.getBookmarkPlugin()];
+  };
+
+  public value = `
+        <h3> ProseMirror element with angular data source</h3>
+        <p> by using  editor internal logic in schema node and plugin</p>
+        <philips-bookmark data-id="123">123</philips-bookmark><div>ABC</div>
     `;
+  updateMeasurement() {
+    this.bookMarkManager.updateBookmarkById(123, { measurement: 5.5 });
+  }
+  public mySchema: Schema = this.schemaService.getSchema();
 }
